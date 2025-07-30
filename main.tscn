@@ -1,4 +1,4 @@
-[gd_scene load_steps=40 format=3 uid="uid://c1vkibpg8hswi"]
+[gd_scene load_steps=44 format=3 uid="uid://c1vkibpg8hswi"]
 
 [ext_resource type="Script" uid="uid://rwyi4vjnect0" path="res://main.gd" id="1_7mycd"]
 [ext_resource type="Texture2D" uid="uid://udrwf3y70xwi" path="res://assets/Colorful Number Sense Snakes and Ladders Worksheet.png" id="1_lquwl"]
@@ -18,8 +18,10 @@
 [ext_resource type="Texture2D" uid="uid://dxdifd7a6w4aa" path="res://assets/Running (32 x 32)/Run3.png" id="16_seu75"]
 [ext_resource type="Texture2D" uid="uid://b77f8a7e0rsos" path="res://assets/Running (32 x 32)/Run4.png" id="17_htxhm"]
 [ext_resource type="Texture2D" uid="uid://dkfgl4r5we6gl" path="res://assets/Running (32 x 32)/Run5.png" id="18_jq2sk"]
+[ext_resource type="Script" uid="uid://qiqlqmaywpui" path="res://script/bot_follow.gd" id="19_lswn8"]
 [ext_resource type="Texture2D" uid="uid://cjipb3qdy77sy" path="res://assets/start/Start3.png" id="20_0odxb"]
 [ext_resource type="Texture2D" uid="uid://bqkye21wydgia" path="res://assets/six sided dice.png" id="20_82xsv"]
+[ext_resource type="Script" uid="uid://bvp14yllenwi0" path="res://script/ladder.gd" id="20_a6jrf"]
 [ext_resource type="Script" uid="uid://cuapqjwu6hdd0" path="res://dice_animation.gd" id="21_getpj"]
 [ext_resource type="Texture2D" uid="uid://bd3rcxny7iv1a" path="res://assets/start/Start5.png" id="21_lswn8"]
 [ext_resource type="Script" uid="uid://b36m17t517yj0" path="res://script/texture_button.gd" id="22_1u8w0"]
@@ -88,6 +90,12 @@ animations = [{
 "name": &"walk",
 "speed": 5.0
 }]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_lswn8"]
+height = 37.8459
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xuqvo"]
+size = Vector2(12, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_getpj"]
 atlas = ExtResource("20_82xsv")
@@ -186,8 +194,13 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="Node2D" type="Node2D"]
+[node name="Node2D" type="Node2D" node_paths=PackedStringArray("random_button", "player", "bot1", "bot2", "bot3")]
 script = ExtResource("1_7mycd")
+random_button = NodePath("TextureButton")
+player = NodePath("Path2D/PathFollow2D")
+bot1 = NodePath("Path2D/PathFollow2D2")
+bot2 = NodePath("Path2D/PathFollow2D3")
+bot3 = NodePath("Path2D/PathFollow2D4")
 
 [node name="BG" type="ColorRect" parent="."]
 offset_left = -583.0
@@ -206,20 +219,60 @@ texture = ExtResource("1_lquwl")
 [node name="Path2D" type="Path2D" parent="."]
 curve = SubResource("Curve2D_1bvp3")
 
-[node name="PathFollow2D" type="PathFollow2D" parent="Path2D" node_paths=PackedStringArray("random_generator")]
+[node name="PathFollow2D" type="PathFollow2D" parent="Path2D" node_paths=PackedStringArray("hitbox")]
 position = Vector2(-272, 272)
 rotation = 0.0516781
 rotates = false
 script = ExtResource("2_h2yge")
-random_generator = NodePath("../../TextureButton")
+hitbox = NodePath("../Area2D")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Path2D/PathFollow2D"]
-position = Vector2(0.585421, -8.04099)
+[node name="CharacterBody2D" type="CharacterBody2D" parent="Path2D/PathFollow2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Path2D/PathFollow2D/CharacterBody2D"]
+position = Vector2(0.585388, -8.04099)
 rotation = -0.0516781
 scale = Vector2(1.47, 1.47)
 sprite_frames = SubResource("SpriteFrames_ycdy4")
 animation = &"Idle"
-frame_progress = 0.0309102
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Path2D/PathFollow2D/CharacterBody2D"]
+position = Vector2(2.89268, -2.1523)
+shape = SubResource("CapsuleShape2D_lswn8")
+
+[node name="PathFollow2D2" type="PathFollow2D" parent="Path2D"]
+position = Vector2(-272, 272)
+rotation = 0.0516781
+rotates = false
+script = ExtResource("19_lswn8")
+
+[node name="Sprite2D" type="Sprite2D" parent="Path2D/PathFollow2D2"]
+texture = ExtResource("4_cegan")
+
+[node name="PathFollow2D3" type="PathFollow2D" parent="Path2D"]
+position = Vector2(-272, 272)
+rotation = 0.0516781
+rotates = false
+script = ExtResource("19_lswn8")
+
+[node name="Sprite2D" type="Sprite2D" parent="Path2D/PathFollow2D3"]
+texture = ExtResource("4_cegan")
+
+[node name="PathFollow2D4" type="PathFollow2D" parent="Path2D"]
+position = Vector2(-272, 272)
+rotation = 0.0516781
+rotates = false
+script = ExtResource("19_lswn8")
+
+[node name="Sprite2D" type="Sprite2D" parent="Path2D/PathFollow2D4"]
+texture = ExtResource("4_cegan")
+
+[node name="Area2D" type="Area2D" parent="Path2D"]
+script = ExtResource("20_a6jrf")
+target_point_index = 14
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Path2D/Area2D"]
+position = Vector2(-77, 264)
+shape = SubResource("RectangleShape2D_xuqvo")
 
 [node name="TextureButton" type="TextureButton" parent="."]
 anchors_preset = 2
@@ -242,3 +295,5 @@ scale = Vector2(6.5, 6.5)
 sprite_frames = SubResource("SpriteFrames_jq2sk")
 animation = &"dice_face"
 script = ExtResource("21_getpj")
+
+[connection signal="body_entered" from="Path2D/Area2D" to="Path2D/PathFollow2D" method="_on_area_2d_body_entered"]

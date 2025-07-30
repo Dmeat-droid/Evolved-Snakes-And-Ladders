@@ -21,6 +21,7 @@ func _on_dice_animation_finished():
 	dice_animation.frame = random_number - 1
 	number_generated.emit(random_number)
 	
+	
 ## Mengembalikan angka acak yang dihasilkan
 ## @return: Angka acak dari 1 hingga 6
 func get_random_number() -> int:
