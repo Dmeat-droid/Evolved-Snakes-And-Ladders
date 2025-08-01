@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://e2t0ulvl0opr"]
+[gd_scene load_steps=29 format=3 uid="uid://e2t0ulvl0opr"]
 
 [ext_resource type="Script" uid="uid://dv3ysab0be52y" path="res://scripts/game_manager.gd" id="1_l756w"]
 [ext_resource type="Texture2D" uid="uid://clugvkttegwni" path="res://assets/player_1/Idle (32 x 32)/sprite_0.png" id="2_r0mdn"]
@@ -22,6 +22,12 @@
 [ext_resource type="Texture2D" uid="uid://3cad6sp6o7pr" path="res://assets/player_2/Diego_Running (32 x 48)/Diego_run4.png" id="19_3bgrf"]
 [ext_resource type="Texture2D" uid="uid://bnufgbr2t71bs" path="res://assets/player_2/Diego_Running (32 x 48)/Diego_run5.png" id="20_vt8ts"]
 [ext_resource type="Texture2D" uid="uid://il3vqcpeausx" path="res://assets/start/Start2.png" id="21_qnvbm"]
+[ext_resource type="Texture2D" uid="uid://bd3rcxny7iv1a" path="res://assets/start/Start5.png" id="23_0bxlt"]
+[ext_resource type="PackedScene" uid="uid://2b1ge8obgerq" path="res://Scenes/pickable.tscn" id="23_ns551"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vvhy6"]
+radius = 15.0
+height = 48.0
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_hm1wn"]
 animations = [{
@@ -106,11 +112,15 @@ animations = [{
 "speed": 5.0
 }]
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ns551"]
+height = 40.0
+
 [node name="Main_game" type="Node"]
 
 [node name="Game_manager" type="Node" parent="." node_paths=PackedStringArray("player_nodes")]
 script = ExtResource("1_l756w")
 player_nodes = [NodePath("../Players/Player_1"), NodePath("../Players/Player_2")]
+power_up_scene = ExtResource("23_ns551")
 
 [node name="Board" type="Node2D" parent="."]
 
@@ -122,18 +132,34 @@ centered = false
 
 [node name="Players" type="Node" parent="."]
 
-[node name="Player_1" type="AnimatedSprite2D" parent="Players"]
+[node name="Player_1" type="CharacterBody2D" parent="Players"]
+position = Vector2(231, 505)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Players/Player_1"]
+position = Vector2(-0.999996, 0.999992)
+scale = Vector2(-1.41861, -1.41861)
+shape = SubResource("CapsuleShape2D_vvhy6")
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="Players/Player_1"]
 z_index = 1
-position = Vector2(230, 530)
+position = Vector2(-1.00001, 1)
 scale = Vector2(1.73437, 1.73437)
 sprite_frames = SubResource("SpriteFrames_hm1wn")
 animation = &"idle"
 
-[node name="Player_2" type="AnimatedSprite2D" parent="Players"]
-position = Vector2(231, 487)
+[node name="Player_2" type="CharacterBody2D" parent="Players"]
+position = Vector2(229, 479)
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="Players/Player_2"]
+position = Vector2(5, -4)
 scale = Vector2(1.28125, 1.28125)
 sprite_frames = SubResource("SpriteFrames_r0mdn")
 animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Players/Player_2"]
+position = Vector2(2.38419e-07, -3.8147e-06)
+scale = Vector2(1.6, 1.6)
+shape = SubResource("CapsuleShape2D_ns551")
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -147,6 +173,7 @@ offset_right = 262.0
 offset_bottom = -18.0
 grow_vertical = 0
 texture_normal = ExtResource("21_qnvbm")
+texture_pressed = ExtResource("23_0bxlt")
 stretch_mode = 0
 
 [node name="Turn_info_label" type="Label" parent="UI"]
@@ -159,6 +186,7 @@ offset_bottom = 74.0
 
 [node name="1" type="Marker2D" parent="Tile_Marker"]
 position = Vector2(318, 583)
+scale = Vector2(1.0511, 0.893798)
 
 [node name="2" type="Marker2D" parent="Tile_Marker"]
 position = Vector2(375, 583)
