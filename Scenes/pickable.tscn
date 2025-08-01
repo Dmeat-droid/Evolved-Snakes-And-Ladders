@@ -1,0 +1,83 @@
+[gd_scene load_steps=13 format=3 uid="uid://2b1ge8obgerq"]
+
+[ext_resource type="Script" uid="uid://de6o878ic36kw" path="res://scripts/pickable.gd" id="1_q5xca"]
+[ext_resource type="Texture2D" uid="uid://cmyii83p2vvg2" path="res://assets/coin_gold.png" id="1_tjycp"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q5xca"]
+size = Vector2(26, 26)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dufq7"]
+atlas = ExtResource("1_tjycp")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uphi6"]
+atlas = ExtResource("1_tjycp")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxnuo"]
+atlas = ExtResource("1_tjycp")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rmsd5"]
+atlas = ExtResource("1_tjycp")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kskir"]
+atlas = ExtResource("1_tjycp")
+region = Rect2(128, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3t0wh"]
+atlas = ExtResource("1_tjycp")
+region = Rect2(160, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pquwr"]
+atlas = ExtResource("1_tjycp")
+region = Rect2(192, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8lcfy"]
+atlas = ExtResource("1_tjycp")
+region = Rect2(224, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_aseih"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dufq7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uphi6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yxnuo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rmsd5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kskir")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3t0wh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pquwr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8lcfy")
+}],
+"loop": true,
+"name": &"spin",
+"speed": 5.0
+}]
+
+[node name="Area2D" type="Area2D"]
+script = ExtResource("1_q5xca")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_q5xca")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_aseih")
+animation = &"spin"
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
