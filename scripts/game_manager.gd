@@ -32,13 +32,13 @@ var special_tiles = {
 @export var step_by_step_tween_duration: float = 0.3 # Durasi pergerakan tween per kotak (saat dadu)
 @export var pause_between_steps_duration: float = 0.1 # Jeda waktu setelah setiap langkah selesai (saat dadu)
 @export var fast_tween_duration: float = 0.8 # Durasi pergerakan cepat (ular/tangga)
+@export var power_up_scenes: Array[PackedScene] # Export untuk memuat scene power-up dari Inspector
+@export var max_power_ups: int = 3 # Maximum number of power ups
+@onready var dice_visual_container = $"/root/Main_game/UI/dice_visual_container" 
+var dice_animation: AnimatedSprite2D
 
-# --- FUNGSI POWER-UP BARU ---
-@export var power_up_scene: PackedScene # Export untuk memuat scene power-up dari Inspector
-var has_double_dice_power_up: Array[bool] = [false, false, false, false] # Menandai pemain mana yang memiliki power-up
-var power_up_instance: Area2D = null # Referensi ke instance power-up yang ada di scene
-
-# --- VARIABEL GAME LAINNYA ---
+# Game's variables
+var active_power_ups: Array = []
 var player_positions: Array[int] = [1, 1, 1, 1] # Menyimpan posisi setiap pemain
 var current_player_index: int = 0 # Indeks pemain saat ini
 var game_over: bool = false
@@ -77,10 +77,6 @@ func _ready():
 	for i in range(player_nodes.size()):
 		player_nodes[i].position = tile_coordinates[1]
 		player_nodes[i].get_node("AnimatedSprite").play("idle")
-		
-		# Set semua pemain tidak memiliki power-up saat game dimulai
-		has_double_dice_power_up[i] = false
-
 	# Hubungkan sinyal 'pressed' dari tombol dadu ke fungsi _on_roll_dice_button_pressed
 	roll_dice_button.pressed.connect(_on_roll_dice_button_pressed)
 	
@@ -89,31 +85,39 @@ func _ready():
 	
 	# Mulai giliran pertama
 	start_turn()
+	
+	await get_tree().process_frame
+	if is_instance_valid(dice_visual_container) and dice_visual_container.has_method("get_node"):
+		dice_animation = dice_visual_container.get_node("Dice_visual/dice_animation")
+		if not is_instance_valid(dice_animation):
+			push_error("Node AnimatedSprite2D 'DiceAnimation' tidak ditemukan di dalam DiceVisualContainer!")
+	else:
+		push_error("Node DiceVisualContainer tidak ditemukan atau tidak memiliki method get_node!")
 
 # Fungsi baru untuk membuat dan menempatkan power-up di papan
 func spawn_power_up():
 	# Hapus power-up yang lama jika masih ada
-	if is_instance_valid(power_up_instance):
-		power_up_instance.queue_free()
-		power_up_instance = null
+	active_power_ups = active_power_ups.filter(func(p): return is_instance_valid(p))
+	
+	# Only spawns certain amount of power-ups
+	if active_power_ups.size() >= max_power_ups:
+		return # Hentikan fungsi jika sudah penuh
 		
-	if power_up_scene:
-		power_up_instance = power_up_scene.instantiate()
-		
-		# Hubungkan sinyal 'picked_up' dari power-up ke fungsi di skrip ini
-		if power_up_instance.has_signal("picked_up"):
-			power_up_instance.picked_up.connect(_on_power_up_picked_up)
-		
-		# Tempatkan power-up di kotak acak yang bukan kotak awal atau akhir
-		var random_tile = randi_range(2, BOARD_SIZE - 1)
-		power_up_instance.position = tile_coordinates[random_tile]
-		add_child(power_up_instance)
-		print("Power-up ditempatkan di kotak: ", random_tile)
+	# Choose some random power-ups
+	if power_up_scenes.is_empty():
+		return
+	
+	var random_power_up_scene = power_up_scenes.pick_random()
+	var new_power_up = random_power_up_scene.instantiate()
 
+	add_child(new_power_up)
+	active_power_ups.append(new_power_up)
+	
+	var random_tile = randi_range(2, BOARD_SIZE - 1)
+	new_power_up.position = tile_coordinates[random_tile]
+	print("Power-up baru muncul di kotak: ", random_tile)
 # Fungsi yang dipanggil saat power-up diambil oleh pemain
 func _on_power_up_picked_up():
-	# Beri pemain saat ini power-up
-	has_double_dice_power_up[current_player_index] = true
 	print("Pemain %d mengambil Power-Up 'Double Dice'!" % (current_player_index + 1))
 	# Setelah power-up diambil, spawn power-up baru setelah beberapa saat
 	await get_tree().create_timer(3.0).timeout
@@ -124,12 +128,13 @@ func start_turn():
 	# Hentikan fungsi jika game sudah berakhir
 	if game_over:
 		return
-
+		
 	# Perbarui label informasi giliran
 	turn_info_label.text = "Giliran Pemain %d" % (current_player_index + 1)
 	
-	# Beri tahu pemain jika mereka memiliki power-up
-	if has_double_dice_power_up[current_player_index]:
+	# Cek power-up langsung ke script pemain
+	var current_player_node = player_nodes[current_player_index]
+	if current_player_node.has_double_dice:
 		turn_info_label.text += " (Power-up AKTIF!)"
 		
 	# Aktifkan tombol dadu
@@ -143,29 +148,18 @@ func _on_roll_dice_button_pressed():
 	# Nonaktifkan tombol dadu saat giliran sedang berlangsung
 	roll_dice_button.disabled = true
 	
-	# 1. Lempar dadu
+	if is_instance_valid(dice_animation):
+		dice_animation.play("roll")
+		await get_tree().create_timer(1.0).timeout # Wait for the animation to run for a while
+		
 	var dice_result = randi_range(1, 6) # Dadu menghasilkan angka 1 sampai 6
 	
-	# LOGIKA BARU: Terapkan power-up 'Double Dice' jika dimiliki
-	if has_double_dice_power_up[current_player_index]:
-		print("POWER-UP AKTIF! Hasil dadu digandakan.")
-		dice_result *= 2
-		# Reset power-up setelah digunakan
-		has_double_dice_power_up[current_player_index] = false
-	
+	# Double dice logic
 	var current_pos = player_positions[current_player_index] # Posisi pemain saat ini
 	var target_pos_after_dice = current_pos + dice_result # Posisi tujuan setelah lemparan dadu
 	
 	print("Pemain %d (di kotak %d) melempar dadu: %d" % [current_player_index + 1, current_pos, dice_result])
 
-	# 2. Aturan Kemenangan: Harus pas di kotak terakhir (BOARD_SIZE)
-	if target_pos_after_dice > BOARD_SIZE:
-		# Jika lemparan melebihi kotak 100, pemain tetap di tempat.
-		print("Terlalu jauh! Pemain %d tetap di kotak %d" % [current_player_index + 1, current_pos])
-		# Pindah ke giliran selanjutnya tanpa bergerak
-		next_turn()
-		return
-	
 	# Pindahkan pemain selangkah demi selangkah ke posisi setelah dadu dilempar
 	# Fungsi ini akan menunggu hingga semua langkah selesai
 	await _move_player_step_by_step(current_pos, target_pos_after_dice)
@@ -203,8 +197,13 @@ func _on_roll_dice_button_pressed():
 	# 5. Pindah ke giliran selanjutnya
 	await get_tree().create_timer(0.5).timeout # Beri jeda sedikit sebelum ganti giliran
 	next_turn()
-
-# --- FUNGSI PERGERAKAN BARU ---
+	
+	if is_instance_valid(dice_animation):
+		dice_animation.play("face")
+		dice_animation.frame = dice_result - 1
+	
+	await get_tree().create_timer(0.5).timeout # Jeda sebelum giliran berikutnya
+	next_turn()
 
 # Fungsi untuk pergerakan pemain selangkah demi selangkah (untuk lemparan dadu)
 func _move_player_step_by_step(start_tile_number: int, end_tile_number: int):
@@ -255,8 +254,6 @@ func _move_player_fast(target_tile_number):
 	await tween.finished
 	player_sprite.play("idle")
 
-# --- FUNGSI UTAMA LAINNYA ---
-
 func next_turn():
 	# Set animasi pemain saat ini ke idle sebelum ganti giliran
 	player_nodes[current_player_index].get_node("AnimatedSprite").play("idle")
@@ -264,3 +261,52 @@ func next_turn():
 	current_player_index = (current_player_index + 1) % player_nodes.size()
 	# Mulai giliran pemain berikutnya
 	start_turn()
+
+func apply_diagonal_teleport_effect():
+	# Nonaktifkan tombol dadu sementara agar tidak bisa diklik selama animasi
+	roll_dice_button.disabled = true
+	print("EFEK TELEPORT DIAGONAL AKTIF!")
+	# Kita akan membuat tween untuk setiap pemain agar mereka bergerak bersamaan
+	var parallel_tween = create_tween().set_parallel(true)
+	# Loop melalui semua pemain yang ada di papan
+	for i in range(player_nodes.size()):
+		var player_node = player_nodes[i]
+		var current_pos = player_positions[i]
+		# --- LOGIKA TELEPORT DIAGONAL 2 LANGKAH ---
+		# Bergerak maju 2 baris (20 petak) dan ke kanan 2 petak.
+		var target_pos = current_pos + 22
+		# Jika target melebihi 100, buat dia "memantul" kembali
+		if target_pos > BOARD_SIZE:
+			var overshoot = target_pos - BOARD_SIZE
+			target_pos = BOARD_SIZE - overshoot
+			print("Pemain %d teleport dari %d ke %d" % [i + 1, current_pos, target_pos])
+			# Masukkan animasi pergerakan pemain ini ke dalam tween paralel
+			player_node.get_node("AnimatedSprite").play("walk")
+			parallel_tween.tween_property(player_node, "position", tile_coordinates[target_pos], fast_tween_duration).set_trans(Tween.TRANS_SINE)
+			player_positions[i] = target_pos # Langsung update posisi logisnya
+	# Tunggu SEMUA animasi di dalam tween paralel selesai
+	await parallel_tween.finished
+	# Setelah semua bergerak, cek apakah ada yang mendarat di ular/tangga
+	await get_tree().create_timer(0.3).timeout # Beri jeda sedikit
+	for i in range(player_nodes.size()):
+		var player_node = player_nodes[i]
+		var final_pos = player_positions[i]
+
+		if special_tiles.has(final_pos):
+			var new_pos = special_tiles[final_pos]
+			print("Pemain %d mendarat di Ular/Tangga! Pindah ke %d" % [i + 1, new_pos])
+			await _move_player_fast_for_player(player_node, new_pos)
+			player_positions[i] = new_pos
+		else:
+			player_node.get_node("AnimatedSprite").play("idle")
+	# Aktifkan kembali tombol dadu
+	roll_dice_button.disabled = false
+	
+func _move_player_fast_for_player(player_node, target_tile_number):
+	var player_sprite = player_node.get_node("AnimatedSprite")
+	var target_position = tile_coordinates[target_tile_number]
+	player_sprite.play("walk")
+	var tween = create_tween()
+	tween.tween_property(player_node, "position", target_position, fast_tween_duration).set_trans(Tween.TRANS_SINE)
+	await tween.finished
+	player_sprite.play("idle")

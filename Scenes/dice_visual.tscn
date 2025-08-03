@@ -1,0 +1,107 @@
+[gd_scene load_steps=15 format=3 uid="uid://b6hvgiorj8bhp"]
+
+[ext_resource type="Texture2D" uid="uid://bqkye21wydgia" path="res://assets/six sided dice.png" id="1_ndj85"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1h15l"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q1a7w"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_03lgd"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ppjdk"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g43wo"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gcbo6"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(80, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_scwqx"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(0, 224, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_afura"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(16, 224, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mv73d"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(32, 224, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u5v25"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(48, 224, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0pnoy"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(64, 224, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xf0b1"]
+atlas = ExtResource("1_ndj85")
+region = Rect2(80, 224, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2aon4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1h15l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q1a7w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_03lgd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ppjdk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g43wo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gcbo6")
+}],
+"loop": false,
+"name": &"face",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_scwqx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_afura")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mv73d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u5v25")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0pnoy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xf0b1")
+}],
+"loop": false,
+"name": &"roll",
+"speed": 5.0
+}]
+
+[node name="Dice_visual" type="Node2D"]
+
+[node name="dice_animation" type="AnimatedSprite2D" parent="."]
+scale = Vector2(2, 2)
+sprite_frames = SubResource("SpriteFrames_2aon4")
+animation = &"face"

@@ -1,9 +1,11 @@
-[gd_scene load_steps=29 format=3 uid="uid://e2t0ulvl0opr"]
+[gd_scene load_steps=32 format=3 uid="uid://e2t0ulvl0opr"]
 
 [ext_resource type="Script" uid="uid://dv3ysab0be52y" path="res://scripts/game_manager.gd" id="1_l756w"]
+[ext_resource type="PackedScene" uid="uid://cilxou77msewv" path="res://Scenes/teleport_powerup.tscn" id="2_58qbg"]
 [ext_resource type="Texture2D" uid="uid://clugvkttegwni" path="res://assets/player_1/Idle (32 x 32)/sprite_0.png" id="2_r0mdn"]
 [ext_resource type="Texture2D" uid="uid://udrwf3y70xwi" path="res://assets/Colorful Number Sense Snakes and Ladders Worksheet.png" id="2_vvhy6"]
 [ext_resource type="Texture2D" uid="uid://dcy6c07un24n8" path="res://assets/player_1/Idle (32 x 32)/sprite_1.png" id="3_0xqxu"]
+[ext_resource type="Script" uid="uid://c1lurfpy37dw3" path="res://scripts/player.gd" id="4_58qbg"]
 [ext_resource type="Texture2D" uid="uid://boqicbb5pfgkq" path="res://assets/player_1/Idle (32 x 32)/sprite_2.png" id="4_tpqse"]
 [ext_resource type="Texture2D" uid="uid://ddialfyqqaljo" path="res://assets/player_1/Idle (32 x 32)/sprite_3.png" id="5_c78sm"]
 [ext_resource type="Texture2D" uid="uid://b6umoshmsugyd" path="res://assets/player_1/Idle (32 x 32)/sprite_4.png" id="6_i47ox"]
@@ -23,7 +25,8 @@
 [ext_resource type="Texture2D" uid="uid://bnufgbr2t71bs" path="res://assets/player_2/Diego_Running (32 x 48)/Diego_run5.png" id="20_vt8ts"]
 [ext_resource type="Texture2D" uid="uid://il3vqcpeausx" path="res://assets/start/Start2.png" id="21_qnvbm"]
 [ext_resource type="Texture2D" uid="uid://bd3rcxny7iv1a" path="res://assets/start/Start5.png" id="23_0bxlt"]
-[ext_resource type="PackedScene" uid="uid://2b1ge8obgerq" path="res://Scenes/pickable.tscn" id="23_ns551"]
+[ext_resource type="PackedScene" uid="uid://2b1ge8obgerq" path="res://Scenes/double_dice.tscn" id="23_ns551"]
+[ext_resource type="Script" uid="uid://cxaq51u72l044" path="res://scripts/dice_visual_container.gd" id="27_06qyo"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vvhy6"]
 radius = 15.0
@@ -120,7 +123,7 @@ height = 40.0
 [node name="Game_manager" type="Node" parent="." node_paths=PackedStringArray("player_nodes")]
 script = ExtResource("1_l756w")
 player_nodes = [NodePath("../Players/Player_1"), NodePath("../Players/Player_2")]
-power_up_scene = ExtResource("23_ns551")
+power_up_scenes = Array[PackedScene]([ExtResource("23_ns551"), ExtResource("2_58qbg")])
 
 [node name="Board" type="Node2D" parent="."]
 
@@ -132,8 +135,9 @@ centered = false
 
 [node name="Players" type="Node" parent="."]
 
-[node name="Player_1" type="CharacterBody2D" parent="Players"]
+[node name="Player_1" type="CharacterBody2D" parent="Players" groups=["players"]]
 position = Vector2(231, 505)
+script = ExtResource("4_58qbg")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Players/Player_1"]
 position = Vector2(-0.999996, 0.999992)
@@ -147,8 +151,9 @@ scale = Vector2(1.73437, 1.73437)
 sprite_frames = SubResource("SpriteFrames_hm1wn")
 animation = &"idle"
 
-[node name="Player_2" type="CharacterBody2D" parent="Players"]
+[node name="Player_2" type="CharacterBody2D" parent="Players" groups=["players"]]
 position = Vector2(229, 479)
+script = ExtResource("4_58qbg")
 
 [node name="AnimatedSprite" type="AnimatedSprite2D" parent="Players/Player_2"]
 position = Vector2(5, -4)
@@ -181,3 +186,8 @@ offset_left = 23.0
 offset_top = 23.0
 offset_right = 236.0
 offset_bottom = 74.0
+
+[node name="dice_visual_container" type="Node2D" parent="UI"]
+position = Vector2(150, 507)
+scale = Vector2(2, 2)
+script = ExtResource("27_06qyo")
